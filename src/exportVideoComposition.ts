@@ -3,9 +3,7 @@ import {
   makeShareableCloneRecursive,
   type WorkletRuntime,
 } from 'react-native-reanimated';
-import { Platform } from 'react-native';
-import { Skia } from '@shopify/react-native-skia';
-import type { SkCanvas, SkSurface } from '@shopify/react-native-skia';
+import type { SkCanvas } from '@shopify/react-native-skia';
 import type {
   ExportOptions,
   FrameDrawer,
@@ -35,41 +33,21 @@ export const exportVideoComposition = async (
   drawFrame: FrameDrawer,
   onProgress?: (progress: { framesCompleted: number; nbFrames: number }) => void
 ): Promise<void> => {
-  let surface: SkSurface | null = null;
-  let drawFrameInner: (...args: any[]) => void;
-  if (Platform.OS === 'android') {
-    surface = Skia.Surface.Make(1, 1);
-    if (!surface) {
-      throw new Error('Failed to create Skia surface');
-    }
-    drawFrameInner = (time: number, frames: Record<string, VideoFrame>) => {
-      'worklet';
-      drawFrame({
-        canvas: surface!.getCanvas(),
-        videoComposition,
-        currentTime: time,
-        frames,
-        width: options.width,
-        height: options.height,
-      });
-    };
-  } else {
-    drawFrameInner = (
-      canvas: SkCanvas,
-      time: number,
-      frames: Record<string, VideoFrame>
-    ) => {
-      'worklet';
-      drawFrame({
-        canvas,
-        videoComposition,
-        currentTime: time,
-        frames,
-        width: options.width,
-        height: options.height,
-      });
-    };
-  }
+  const drawFrameInner = (
+    canvas: SkCanvas,
+    time: number,
+    frames: Record<string, VideoFrame>
+  ) => {
+    'worklet';
+    drawFrame({
+      canvas,
+      videoComposition,
+      currentTime: time,
+      frames,
+      width: options.width,
+      height: options.height,
+    });
+  };
 
   const nbFrames = videoComposition.duration * options.frameRate;
 
@@ -87,8 +65,7 @@ export const exportVideoComposition = async (
               framesCompleted: frameIndex + 1,
               nbFrames,
             })
-        : null,
-      surface
+        : null
     )
   );
 };

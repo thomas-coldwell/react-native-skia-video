@@ -334,9 +334,7 @@ export type RNSkiaVideoModule = {
     drawFrame: any, // ShareableRef<FrameDrawer>
     onCompletion: () => void,
     onError: (error: any) => void,
-    onProgress: ((frame: number) => void) | null,
-    // android only
-    surface: SkSurface | null
+    onProgress: ((frame: number) => void) | null
   ) => Promise<void>;
 
   /**

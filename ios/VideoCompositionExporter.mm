@@ -172,7 +172,8 @@ void RNSkiaVideo::exportVideoComposition(
     id<MTLTexture> cpuAccessibleTexture =
         [device newTextureWithDescriptor:descriptor];
 
-    id<MTLCommandBuffer> commandBuffer = [commandQueue commandBufferWithUnretainedReferences];
+    id<MTLCommandBuffer> commandBuffer =
+        [commandQueue commandBufferWithUnretainedReferences];
     id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
     [blitEncoder
           copyFromTexture:mlTexture

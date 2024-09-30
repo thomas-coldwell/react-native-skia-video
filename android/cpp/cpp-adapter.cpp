@@ -7,7 +7,6 @@
 #include <WorkletRuntime.h>
 #include <jni.h>
 #include <jsi/jsi.h>
-#include <react-native-skia/JsiSkSurface.h>
 
 using namespace facebook;
 using namespace RNSkiaVideo;
@@ -70,12 +69,11 @@ void install(jsi::Runtime& jsiRuntime) {
       jsi::PropNameID::forAscii(jsiRuntime, "exportVideoComposition"), 6,
       [](jsi::Runtime& runtime, const jsi::Value& thisValue,
          const jsi::Value* arguments, size_t count) -> jsi::Value {
-        if (count != 8) {
-          throw jsi::JSError(
-              runtime,
-              "SkiaVideo.exportVideoComposition(..) expects 6"
-              "arguments (composition, options, workletRuntime, "
-              "drawFrame, onSuccess, onError, onProgress?, SkSurface)!");
+        if (count < 6) {
+          throw jsi::JSError(runtime,
+                             "SkiaVideo.exportVideoComposition(..) expects 6"
+                             "arguments (composition, options, workletRuntime, "
+                             "drawFrame, onSuccess, onError, onProgress?)!");
         }
 
         auto onSuccess = std::make_shared<jsi::Function>(
@@ -83,7 +81,7 @@ void install(jsi::Runtime& jsiRuntime) {
         auto onError = std::make_shared<jsi::Function>(
             arguments[5].asObject(runtime).asFunction(runtime));
         std::shared_ptr<jsi::Function> onProgress = nullptr;
-        if (arguments[6].isObject()) {
+        if (count >= 7 && arguments[6].isObject()) {
           onProgress = std::make_shared<jsi::Function>(
               arguments[6].asObject(runtime).asFunction(runtime));
         }
@@ -94,9 +92,7 @@ void install(jsi::Runtime& jsiRuntime) {
             reanimated::extractWorkletRuntime(runtime, arguments[2]),
             reanimated::extractShareableOrThrow<reanimated::ShareableWorklet>(
                 runtime, arguments[3]),
-            onSuccess, onError, onProgress,
-            std::static_pointer_cast<RNSkia::JsiSkSurface>(
-                arguments[7].asObject(runtime).asHostObject(runtime)));
+            onSuccess, onError, onProgress);
       });
   RNSVModule.setProperty(jsiRuntime, "exportVideoComposition",
                          std::move(exportVideoComposition));
