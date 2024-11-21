@@ -31,6 +31,8 @@ const CompositionPlayer = (props: CompositionPlayerProps) => {
   const { width, height, uri, frameWidth, frameHeight, duration, isPlaying } =
     props;
 
+  const [isReady, setIsReady] = useState(false);
+
   const aspectRatio = frameWidth / frameHeight;
 
   const outputSize = useMemo(() => {
@@ -41,7 +43,9 @@ const CompositionPlayer = (props: CompositionPlayerProps) => {
   }, [frameHeight, aspectRatio]);
 
   const videoComposition = useMemo(() => {
-    return createVideoComposition(uri, duration);
+    const videoComposition = createVideoComposition(uri, duration);
+    console.log('Created video composition', videoComposition.duration);
+    return videoComposition;
   }, [uri, duration]);
 
   const frameDrawer = useMemo(() => {
@@ -53,17 +57,23 @@ const CompositionPlayer = (props: CompositionPlayerProps) => {
     drawFrame: frameDrawer,
     width: outputSize.width,
     height: outputSize.height,
-    autoPlay: true,
+    autoPlay: false,
     isLooping: true,
+    onReadyToPlay() {
+      setIsReady(true);
+    },
   });
 
   useEffect(() => {
+    if (!isReady) {
+      return;
+    }
     if (isPlaying) {
       compositionPlayer.player?.play();
     } else {
       compositionPlayer.player?.pause();
     }
-  }, [isPlaying, compositionPlayer]);
+  }, [isReady, isPlaying, compositionPlayer]);
 
   // Canvas need to be in pixel units so we have a container to scale it to
   // the actual size of the preview window
@@ -88,6 +98,10 @@ const CompositionPlayer = (props: CompositionPlayerProps) => {
     }),
     [outputSize]
   );
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <View style={containerStyle}>
