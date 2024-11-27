@@ -33,13 +33,17 @@ export const createFrameDrawer = () => {
 
     if (frame == null) return;
 
-    const image = Skia.Image.MakeImageFromNativeBuffer(frame.buffer);
-    canvas.drawImageRect(
-      image,
-      rect(0, 0, frame.width, frame.height),
-      rect(0, 0, width, height),
-      Skia.Paint()
-    );
+    try {
+      const image = Skia.Image.MakeImageFromNativeBuffer(frame.buffer);
+      canvas.drawImageRect(
+        image,
+        rect(0, 0, frame.width, frame.height),
+        rect(0, 0, width, height),
+        Skia.Paint()
+      );
+    } catch (error) {
+      console.error('Error drawing frame', error);
+    }
   };
 
   return drawFrame;

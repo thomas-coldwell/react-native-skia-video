@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Home } from './Home/Home';
 import { Route } from './types';
 import { BasicVideoPlayer } from './Examples/BasicVideoPlayer';
+import { BasicVideoComposition } from './Examples/BasicVideoComposition';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,11 +21,11 @@ function App() {
           options={{ title: 'Video Player Example' }}
           component={BasicVideoPlayer}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name={Route.BasicVideoComposition}
           options={{ title: 'Video Composition Example' }}
-          component={VideoCompositionExample}
-        /> */}
+          component={BasicVideoComposition}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
