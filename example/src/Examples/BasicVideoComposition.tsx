@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { createFrameDrawer, createVideoComposition } from '../helpers';
 import {
+  SAMPLE_VIDEO_FPS,
   SAMPLE_VIDEO_HEIGHT,
   SAMPLE_VIDEO_URL,
   SAMPLE_VIDEO_WIDTH,
@@ -12,6 +13,7 @@ import {
 } from '@azzapp/react-native-skia-video';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import Video from 'react-native-video';
+import Share from 'react-native-share';
 
 const frameDrawer = createFrameDrawer();
 const outPath =
@@ -29,7 +31,7 @@ export const BasicVideoComposition = () => {
   const render = useCallback(() => {
     const requestedConfig = {
       bitRate: 5_000_000,
-      frameRate: 30,
+      frameRate: SAMPLE_VIDEO_FPS,
       height: SAMPLE_VIDEO_HEIGHT,
       width: SAMPLE_VIDEO_WIDTH,
     };
@@ -52,7 +54,7 @@ export const BasicVideoComposition = () => {
       {
         width: SAMPLE_VIDEO_WIDTH,
         height: SAMPLE_VIDEO_HEIGHT,
-        frameRate: 30,
+        frameRate: SAMPLE_VIDEO_FPS,
         bitRate: 5_000_000,
         outPath,
         ...encoderConfig,
@@ -73,11 +75,17 @@ export const BasicVideoComposition = () => {
   }
 
   return (
-    <Video
-      source={{ uri: outPath }}
-      style={{ width: '100%', aspectRatio: 16 / 9 }}
-      paused={false}
-      repeat={true}
-    />
+    <React.Fragment>
+      <Video
+        source={{ uri: outPath }}
+        style={{ width: '100%', aspectRatio: 16 / 9 }}
+        paused={false}
+        repeat={true}
+      />
+      <Button
+        title="Share"
+        onPress={() => Share.open({ url: `file://${outPath}` })}
+      />
+    </React.Fragment>
   );
 };
