@@ -6,7 +6,8 @@
 #import <React/RCTBridge.h>
 #import <SkSurface.h>
 #import <SkiaMetalSurfaceFactory.h>
-#import <include/gpu/GrBackendSurface.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
+#import <include/gpu/ganesh/GrBackendSurface.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
 #import <include/gpu/ganesh/SkSurfaceGanesh.h>
 #import <map>
@@ -22,8 +23,8 @@ NS_INLINE NSError* createErrorWithMessage(NSString* message) {
 void RNSkiaVideo::exportVideoComposition(
     std::shared_ptr<VideoComposition> composition, std::string outPath,
     int width, int height, int frameRate, int bitRate,
-    std::shared_ptr<reanimated::WorkletRuntime> workletRuntime,
-    std::shared_ptr<reanimated::ShareableWorklet> drawFrame,
+    std::shared_ptr<worklets::WorkletRuntime> workletRuntime,
+    std::shared_ptr<worklets::ShareableWorklet> drawFrame,
     std::shared_ptr<RNSkPlatformContext> rnskPlatformContext,
     std::function<void()> onComplete, std::function<void(NSError*)> onError,
     std::function<void(int)> onProgress) {
@@ -141,6 +142,10 @@ void RNSkiaVideo::exportVideoComposition(
                                CMTimeGetSeconds(currentTime), frames);
 
     GrAsDirectContext(surface->recordingContext())->flushAndSubmit();
+    // Surface seems not initialized on first frame, waiting 1 milliseconds
+    if (i == 0) {
+      usleep(1000);
+    }
     GrBackendTexture texture = SkSurfaces::GetBackendTexture(
         surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
     if (!texture.isValid()) {
@@ -151,7 +156,7 @@ void RNSkiaVideo::exportVideoComposition(
     }
 
     GrMtlTextureInfo textureInfo;
-    if (!texture.getMtlTextureInfo(&textureInfo)) {
+    if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
       releaseResources();
       onError(
           createErrorWithMessage(@"Could not extract texture from SkSurface"));
